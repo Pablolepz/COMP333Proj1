@@ -8,22 +8,31 @@ typedef struct {
 } image_t;
 #define getByte(value, n) (value >> (n*8) & 0xFF)
 
-uint32_t getpixel(image_t *image, unsigned int x, unsigned int y){
+uint32_t getpixel(image_t *image, unsigned int x, unsigned int y)
+{
     return image->pixels[(y*image->w)+x];
 }
-float lerp(float s, float e, float t){return s+(e-s)*t;}
-float blerp(float c00, float c10, float c01, float c11, float tx, float ty){
+float lerp(float s, float e, float t)
+{
+  return s+(e-s)*t;
+}
+float blerp(float c00, float c101, float c01, float c11, float tx, float ty)
+{
     return lerp(lerp(c00, c10, tx), lerp(c01, c11, tx), ty);
 }
-void putpixel(image_t *image, unsigned int x, unsigned int y, uint32_t color){
+void putpixel(image_t *image, unsigned int x, unsigned int y, uint32_t color)
+{
     image->pixels[(y*image->w) + x] = color;
 }
-void scale(image_t *src, image_t *dst, float scalex, float scaley){
+void scale(image_t *src, image_t *dst, float scalex, float scaley)
+{
     int newWidth = (int)src->w*scalex;
     int newHeight= (int)src->h*scaley;
     int x, y;
-    for(x= 0, y=0; y < newHeight; x++){
-        if(x > newWidth){
+    for(x= 0, y=0; y < newHeight; x++)
+    {
+        if(x > newWidth)
+        {
             x = 0; y++;
         }
         float gx = x / (float)(newWidth) * (src->w-1);
@@ -36,7 +45,8 @@ void scale(image_t *src, image_t *dst, float scalex, float scaley){
         uint32_t c01 = getpixel(src, gxi, gyi+1);
         uint32_t c11 = getpixel(src, gxi+1, gyi+1);
         uint8_t i;
-        for(i = 0; i < 3; i++){
+        for(i = 0; i < 3; i++)
+        {
             //((uint8_t*)&result)[i] = blerp( ((uint8_t*)&c00)[i], ((uint8_t*)&c10)[i], ((uint8_t*)&c01)[i], ((uint8_t*)&c11)[i], gxi - gx, gyi - gy); // this is shady
             result |= (uint8_t)blerp(getByte(c00, i), getByte(c10, i), getByte(c01, i), getByte(c11, i), gx - gxi, gy -gyi) << (8*i);
         }
@@ -46,6 +56,10 @@ void scale(image_t *src, image_t *dst, float scalex, float scaley){
 
 int main ()
 {
-  scale()
+  image_t pntr = fopen("pic_1.jpg", "rb");
+  image_t pntr2 = fopen("pic_out.jpg", "wb");
+  scale(pntr, pntr2, 1.6f, 1.6f);
+  fclose(pntr);
+  fclose(pntr2);
   return 1;
 }
